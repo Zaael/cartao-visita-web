@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  gatsby:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gatsby_app
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+      GATSBY_WEBPACK_PUBLICPATH: /
+      CHOKIDAR_USEPOLLING: true
+      WATCHPACK_POLLING: true
+    command: npm run develop -- -H 0.0.0.0 -p 8000
