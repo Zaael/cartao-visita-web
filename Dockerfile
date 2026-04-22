@@ -2,9 +2,18 @@ FROM node:20-bullseye
 
 WORKDIR /app
 
+# Instala dependências de sistema necessárias para o Sharp
+RUN apt-get update && apt-get install -y \
+    libvips-dev \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
 
 RUN npm install
+
+# Garante que o Sharp seja compilado para o Linux do container
+RUN npm rebuild sharp
 
 COPY . .
 

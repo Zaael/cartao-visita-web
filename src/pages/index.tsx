@@ -1,15 +1,17 @@
 import * as React from "react";
 import type { HeadFC, PageProps } from "gatsby";
+import Cartao from "../components/cartao";
+import Fundo from "../components/particulas";
 
 const IndexPage: React.FC<PageProps> = () => {
-  return (
-    <main>
-      <h1 className="text-shadow-cyan-600">Cartão de Vista</h1>
-      <div className="border-sky-700 border-2 rounded-3xl bg-sky-950 text-white w-full h-full m-40">
-        Chega mais
-      </div>
-    </main>
-  );
+    return (
+        <div className="flex flex-col h-screen">
+            <main className="relative flex flex-col h-screen w-full items-center justify-center">
+                <Fundo />
+                <Cartao />
+            </main>
+        </div>
+    );
 };
 
 export default IndexPage;
