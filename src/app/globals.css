@@ -1,0 +1,97 @@
+/*
+ * Ordem das cascade layers:
+ *   tw-base       preflight do Tailwind, antes do Mantine para nao zerar o que ele define
+ *   mantine       estilos dos componentes do Mantine
+ *   app-base      estilos base do projeto (body etc), precisam ganhar do Mantine
+ *   tw-components classes do projeto (.card, .nav-menu, ...)
+ *   tw-utilities  utilities do Tailwind, sempre por ultimo para poder sobrescrever tudo
+ */
+@layer tw-base, mantine, app-base, tw-components, tw-utilities;
+
+@import "tailwindcss/theme.css" layer(tw-base);
+@import "tailwindcss/preflight.css" layer(tw-base);
+@import "tailwindcss/utilities.css" layer(tw-utilities);
+
+@import "@mantine/core/styles.layer.css";
+
+/*
+ * O Fontsource publica um arquivo por peso/estilo — o `index.css` traz so o 400.
+ * Importamos os pesos que o layout realmente usa; ao usar um peso novo,
+ * adicione o arquivo correspondente aqui, senao o browser sintetiza (ou ignora).
+ */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/100-italic.css";
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/700.css";
+
+@source "../";
+
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer app-base {
+  /* Tema padrao do cartao. <TemaCartao> sobrescreve estas duas por cartao com
+     style inline, que sempre ganha e e' herdado pelos filhos. Ficam aqui, e
+     nao como fallback em cada `var(...)`, porque valor arbitrario do Tailwind
+     com virgula e `#` dentro nao gera regra que case com a classe. */
+  :root {
+    --card-primary: #3b82f6;
+    --card-secondary: #a855f7;
+  }
+
+  body {
+    @apply bg-gray-900 text-white m-auto p-8 min-h-screen font-inter;
+  }
+}
+
+@layer tw-components {
+  /* As cores vem de `--card-primary`/`--card-secondary` (default em :root,
+     sobrescritas por cartao em <TemaCartao>).
+
+     A largura vem do container (max-w-*), nao daqui: `w-7xl` fixo estourava
+     a viewport em telas menores que 80rem. */
+  .card {
+    @apply text-white rounded-lg p-4;
+    background-color: color-mix(in srgb, var(--card-primary) 12%, #020617);
+  }
+
+  .card-border {
+    @apply p-px rounded-lg;
+    background-image: linear-gradient(
+      to right,
+      var(--card-primary),
+      var(--card-secondary)
+    );
+  }
+
+  .avatar {
+    @apply relative inline-block h-34 w-34 rounded-full object-cover object-center;
+  }
+
+  h1 {
+    @apply text-2xl font-bold font-sans;
+  }
+
+  h2 {
+    @apply text-lg font-thin font-stretch-expanded italic;
+  }
+
+  /* `h-10 w-10` estava no container, espremendo os tres links num quadrado
+     de 40px. O tamanho de cada icone vem do proprio <Icone size={24} />. */
+  .redes-sociais {
+    @apply flex gap-4 items-center list-none;
+  }
+
+  .lista-menu {
+    @apply flex gap-8 p-2 list-none;
+  }
+
+  .nav-menu {
+    @apply flex items-center w-full justify-center border-b border-gray-700;
+  }
+}

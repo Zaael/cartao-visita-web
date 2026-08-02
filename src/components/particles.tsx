@@ -1,8 +1,7 @@
-import { useEffect, useRef } from "react";
-import React from "react";
-import { Renderer, Camera, Geometry, Program, Mesh } from "ogl";
+"use client";
 
-import "./Particles.css";
+import { useEffect, useRef } from "react";
+import { Renderer, Camera, Geometry, Program, Mesh } from "ogl";
 
 const defaultColors = ["#ffffff", "#ffffff", "#ffffff"];
 
@@ -86,11 +85,27 @@ const fragment = /* glsl */ `
   }
 `;
 
+interface ParticlesProps {
+  particleCount?: number;
+  particleSpread?: number;
+  speed?: number;
+  particleColors?: string[];
+  moveParticlesOnHover?: boolean;
+  particleHoverFactor?: number;
+  alphaParticles?: boolean;
+  particleBaseSize?: number;
+  sizeRandomness?: number;
+  cameraDistance?: number;
+  disableRotation?: boolean;
+  pixelRatio?: number;
+  className?: string;
+}
+
 const Particles = ({
   particleCount = 200,
   particleSpread = 10,
   speed = 0.1,
-  particleColors = [""],
+  particleColors,
   moveParticlesOnHover = false,
   particleHoverFactor = 1,
   alphaParticles = false,
@@ -100,9 +115,13 @@ const Particles = ({
   disableRotation = false,
   pixelRatio = 1,
   className = "",
-}) => {
-  const containerRef = useRef(null);
+}: ParticlesProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+
+  // `particleColors` é um array literal, então muda de identidade a cada render
+  // do pai. Serializar evita recriar o contexto WebGL inteiro à toa.
+  const coresSerializadas = JSON.stringify(particleColors ?? defaultColors);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -129,7 +148,7 @@ const Particles = ({
     window.addEventListener("resize", resize, false);
     resize();
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
@@ -144,13 +163,10 @@ const Particles = ({
     const positions = new Float32Array(count * 3);
     const randoms = new Float32Array(count * 4);
     const colors = new Float32Array(count * 3);
-    const palette =
-      particleColors && particleColors.length > 0
-        ? particleColors
-        : defaultColors;
+    const palette: string[] = JSON.parse(coresSerializadas);
 
     for (let i = 0; i < count; i++) {
-      let x, y, z, len;
+      let x: number, y: number, z: number, len: number;
       do {
         x = Math.random() * 2 - 1;
         y = Math.random() * 2 - 1;
@@ -189,11 +205,11 @@ const Particles = ({
 
     const particles = new Mesh(gl, { mode: gl.POINTS, geometry, program });
 
-    let animationFrameId;
+    let animationFrameId: number;
     let lastTime = performance.now();
     let elapsed = 0;
 
-    const update = (t) => {
+    const update = (t: number) => {
       animationFrameId = requestAnimationFrame(update);
       const delta = t - lastTime;
       lastTime = t;
@@ -230,11 +246,11 @@ const Particles = ({
         container.removeChild(gl.canvas);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     particleCount,
     particleSpread,
     speed,
+    coresSerializadas,
     moveParticlesOnHover,
     particleHoverFactor,
     alphaParticles,
@@ -246,7 +262,7 @@ const Particles = ({
   ]);
 
   return (
-    <div ref={containerRef} className={`particles-container ${className}`} />
+    <div ref={containerRef} className={`relative h-full w-full ${className}`} />
   );
 };
 

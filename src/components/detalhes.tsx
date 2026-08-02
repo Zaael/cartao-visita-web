@@ -1,126 +1,131 @@
-import React from "react";
+import Image from "next/image";
 import { Timeline, Text } from "@mantine/core";
-import { RedesSociais } from "./redesSociais";
+import { HiEnvelope, HiMiniPhone } from "react-icons/hi2";
+import { FaWhatsapp } from "react-icons/fa";
+import type { Cartao } from "@/types/cartao";
+import RedesSociais from "./redes-sociais";
 
-function Projetos() {
-    return (
-        <section>
-            <Timeline active={3} lineWidth={3}>
-                <Timeline.Item title="Indra">
-                    <Text>Trabalhei na Indra</Text>
-                </Timeline.Item>
-                <Timeline.Item title="MPS">
-                    <Text>Trabalhei no MPS</Text>
-                </Timeline.Item>
-                <Timeline.Item title="Minsait">
-                    <Text>Trabalhei no Minsait</Text>
-                </Timeline.Item>
-            </Timeline>
-        </section>
-    );
+export function Sobre({ cartao }: { cartao: Cartao }) {
+  if (!cartao.sobre) return null;
+
+  // `sobre` é texto livre com parágrafos separados por linha em branco —
+  // é onde habilidades e formação passaram a viver.
+  const paragrafos = cartao.sobre.split(/\n{2,}/).filter(Boolean);
+
+  return (
+    <section className="max-w-xl space-y-4 leading-relaxed text-slate-300">
+      {paragrafos.map((paragrafo, i) => (
+        <p key={i}>{paragrafo}</p>
+      ))}
+    </section>
+  );
 }
 
-function Contatos() {
-    return (
-        <section>
-            <RedesSociais />
-            <p className="text-slate-400 text-sm mt-4">zaael.dev@gmail.com</p>
-            <p className="text-slate-400 text-sm mt-4">
-                israelsouto.s@gmail.com
-            </p>
-            <p>(11) 9 77763646</p>
-        </section>
-    );
+export function Projetos({ cartao }: { cartao: Cartao }) {
+  if (cartao.projetos.length === 0) return null;
+
+  return (
+    <section className="w-full max-w-xl">
+      <Timeline active={cartao.projetos.length} lineWidth={3} bulletSize={16}>
+        {cartao.projetos.map((projeto) => (
+          <Timeline.Item key={projeto.titulo} title={projeto.titulo}>
+            <Text size="sm" c="dimmed">
+              {projeto.descricao}
+            </Text>
+            {projeto.link && (
+              <Text
+                component="a"
+                href={projeto.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="sm"
+                c="var(--card-primary)"
+              >
+                Ver projeto
+              </Text>
+            )}
+          </Timeline.Item>
+        ))}
+      </Timeline>
+    </section>
+  );
 }
 
-function Resumo() {
-    const techSkills = [
-        { name: ".NET", level: 3 },
-        { name: "JS", level: 3 },
-        { name: "SQL", level: 3 },
-        { name: "WEB/API/MVC", level: 3 },
-        { name: "GIT", level: 3 },
-        { name: "Azure DevOps", level: 2 },
-        { name: "SOLID", level: 2 },
-    ];
+export function Galeria({ cartao }: { cartao: Cartao }) {
+  if (cartao.galeria.length === 0) return null;
 
-    const softSkills = [
-        { name: "Dedicação", level: 4 },
-        { name: "Inglês", level: 3 },
-        { name: "Curiosidade", level: 3 },
-        { name: "Comunicação", level: 4 },
-        { name: "Trabalho em Equipe", level: 3 },
-        { name: "Proatividade", level: 3 },
-        { name: "CleanCode", level: 2 },
-    ];
-
-    return (
-        <div className="max-w-2xl text-slate-300 p-8 font-sans leading-relaxed">
-            {/* Habilidades */}
-            <div className="border-t border-b border-slate-700 py-6">
-                <h3 className="text-center text-2xl font-light mb-6 tracking-widest uppercase">
-                    Habilidades
-                </h3>
-
-                <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm">
-                    {/* Coluna Tech */}
-                    <div className="space-y-2">
-                        {techSkills.map((skill) => (
-                            <div
-                                key={skill.name}
-                                className="flex justify-between items-center"
-                            >
-                                <span className="flex-1 text-right mr-3 font-medium">
-                                    {skill.name}
-                                </span>
-                                <div className="flex gap-1">
-                                    {[...Array(4)].map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className={`w-3 h-3 rounded-full ${i < skill.level ? "bg-cyan-400" : "bg-white"}`}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Coluna Soft */}
-                    <div className="space-y-2">
-                        {softSkills.map((skill) => (
-                            <div key={skill.name} className="flex items-center">
-                                <div className="flex gap-1 mr-3">
-                                    {[...Array(4)].map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className={`w-3 h-3 rounded-full ${i < skill.level ? "bg-cyan-400" : "bg-white"}`}
-                                        />
-                                    ))}
-                                </div>
-                                <span className="font-medium">
-                                    {skill.name}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-            <Projetos />
-            <Formacao />
-        </div>
-    );
+  return (
+    <section className="grid w-full max-w-xl grid-cols-2 gap-3 sm:grid-cols-3">
+      {cartao.galeria.map((url) => (
+        <Image
+          key={url}
+          src={url}
+          alt=""
+          width={200}
+          height={200}
+          className="h-32 w-full rounded-lg object-cover"
+        />
+      ))}
+    </section>
+  );
 }
 
-function Formacao() {
-    return (
-        <div>
-            <h2 className="text-xl font-semibold mb-4">Formações</h2>
-            <div>
-                <p>Tecnólogo em Análise e Desenvolvimento de Sistemas</p>
-                <p>Facultade Impacta de Tecnologia, 2018-2019</p>
-            </div>
-        </div>
-    );
+export function Contatos({ cartao }: { cartao: Cartao }) {
+  const { contato } = cartao;
+
+  return (
+    <section className="flex flex-col items-center gap-4">
+      <RedesSociais redes={cartao.redesSociais} nome={cartao.nome} />
+
+      <ul className="space-y-2 text-sm text-slate-300">
+        {contato.email && (
+          <LinhaContato Icone={HiEnvelope} rotulo="E-mail">
+            <a href={`mailto:${contato.email}`} className="hover:text-white">
+              {contato.email}
+            </a>
+          </LinhaContato>
+        )}
+        {contato.telefone && (
+          <LinhaContato Icone={HiMiniPhone} rotulo="Telefone">
+            <a
+              href={`tel:${contato.telefone.replace(/\D/g, "")}`}
+              className="hover:text-white"
+            >
+              {contato.telefone}
+            </a>
+          </LinhaContato>
+        )}
+        {contato.whatsapp && (
+          <LinhaContato Icone={FaWhatsapp} rotulo="WhatsApp">
+            <a
+              href={`https://wa.me/${contato.whatsapp.replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white"
+            >
+              {contato.whatsapp}
+            </a>
+          </LinhaContato>
+        )}
+      </ul>
+    </section>
+  );
 }
 
-export { Projetos, Contatos, Resumo };
+function LinhaContato({
+  Icone,
+  rotulo,
+  children,
+}: {
+  Icone: React.ComponentType<{ "aria-hidden"?: boolean }>;
+  rotulo: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="flex items-center gap-2">
+      <Icone aria-hidden />
+      <span className="sr-only">{rotulo}:</span>
+      {children}
+    </li>
+  );
+}

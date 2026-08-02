@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  // Define o subdomínio: <name>.<sua-conta>.workers.dev
+  "name": "cartao-visita-web",
+  "compatibility_date": "2026-08-02",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Habilita a otimização de imagem do next/image no Workers
+  "images": {
+    "binding": "IMAGES"
+  }
+  // As variáveis do Supabase NÃO ficam aqui (este arquivo é commitado).
+  // Rotas pré-geradas não precisam delas em runtime, mas um slug novo que
+  // ainda não existia no build é renderizado sob demanda e precisa.
+  // Definir com: npx wrangler secret put NEXT_PUBLIC_SUPABASE_URL  (e a key)
+}
