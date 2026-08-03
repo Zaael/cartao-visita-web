@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { HiMapPin } from "react-icons/hi2";
 import type { Cartao } from "@/types/cartao";
+import { iniciais } from "@/lib/iniciais";
 import RedesSociais from "./redes-sociais";
 
 export default function ResumoPerfil({ cartao }: { cartao: Cartao }) {
@@ -33,19 +34,13 @@ function Avatar({ url, nome }: { url?: string; nome: string }) {
   if (!url) {
     // Cartão sem foto ainda é um cartão válido — mostra as iniciais em vez de
     // um espaço vazio ou de uma imagem quebrada.
-    const iniciais = nome
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((parte) => parte[0]?.toUpperCase() ?? "")
-      .join("");
-
     return (
       <div
         className="avatar flex items-center justify-center bg-slate-700 text-3xl font-bold"
         role="img"
         aria-label={`Foto de ${nome} não disponível`}
       >
-        {iniciais}
+        {iniciais(nome)}
       </div>
     );
   }
@@ -57,7 +52,8 @@ function Avatar({ url, nome }: { url?: string; nome: string }) {
       width={136}
       height={136}
       className="avatar"
-      priority
+      // É o LCP da página. `preload` substitui o `priority`, deprecado no 16.
+      preload
     />
   );
 }

@@ -43,8 +43,12 @@ export default function TemaCartao({
         dark: {},
       })}
     >
+      {/* `w-full` porque este div é só um portador de variáveis e não deveria
+          interferir no layout: como item de um flex, sem isso ele encolhe até
+          o conteúdo e o `max-width` do cartão nunca chega a valer. */}
       <div
         data-tema-cartao
+        className="w-full"
         style={
           {
             "--card-primary": primaria,

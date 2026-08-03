@@ -42,6 +42,25 @@
   :root {
     --card-primary: #3b82f6;
     --card-secondary: #a855f7;
+
+    /* Medidas do cartao. Sao variaveis porque tem dois consumidores que
+       precisam concordar: o cartao em si e os modais de projeto/galeria, que
+       abrem exatamente do tamanho dele. Com dois valores soltos, mexer num
+       deixaria o outro para tras.
+
+       A altura e' fixa (nao min-height) de proposito: trocar de aba nao pode
+       mudar o tamanho do cartao. Quem passa do limite rola por dentro. */
+    --card-largura: 64rem;
+    --card-altura: 40rem;
+  }
+
+  /* Empilhado, o painel do perfil fica *em cima* do conteudo em vez de ao
+     lado, entao o cartao precisa de mais altura. O breakpoint e' o mesmo `md`
+     em que o layout vira duas colunas. */
+  @media (width >= 48rem) {
+    :root {
+      --card-altura: 30rem;
+    }
   }
 
   body {
@@ -87,11 +106,125 @@
     @apply flex gap-4 items-center list-none;
   }
 
+  /* Gap menor no mobile: com a aba Galeria sempre presente sao quatro itens,
+     e `gap-8` estourava a largura do cartao em telas de ~375px. O padding
+     lateral dos botoes encolhe junto (ver `nav-menu.tsx`).
+
+     A centralizacao e' `mx-auto` aqui, e nao `justify-center` no pai: com o
+     pai rolando na horizontal, `justify-center` deixaria o primeiro item
+     inalcancavel quando as abas nao coubessem. */
   .lista-menu {
-    @apply flex gap-8 p-2 list-none;
+    @apply flex gap-2 p-2 mx-auto list-none sm:gap-8;
   }
 
+  /* Rede de seguranca para telas bem estreitas (~320px), onde nem o gap
+     reduzido salva: as abas rolam em vez de serem cortadas. */
   .nav-menu {
-    @apply flex items-center w-full justify-center border-b border-gray-700;
+    @apply flex items-center w-full overflow-x-auto border-b border-gray-700;
+  }
+
+  /* Card pequeno e clicavel — projeto na aba Projetos, miniatura na Galeria.
+     Abre o modal com o conteudo inteiro, entao aqui so cabe a chamada. */
+  .card-mini {
+    @apply flex cursor-pointer flex-col gap-1 rounded-lg border p-3 text-left transition-colors;
+    border-color: color-mix(in srgb, var(--card-primary) 30%, transparent);
+    background-color: color-mix(in srgb, var(--card-primary) 8%, transparent);
+  }
+
+  .card-mini:hover,
+  .card-mini:focus-visible {
+    border-color: var(--card-primary);
+    background-color: color-mix(in srgb, var(--card-primary) 18%, transparent);
+  }
+
+  .card-mini:focus-visible {
+    @apply outline-2 outline-offset-2;
+    outline-color: var(--card-primary);
+  }
+
+  /* ----- Verso do cartao -------------------------------------------------
+     Num cartao impresso o verso e' a face grafica: pouco texto, muita marca.
+     Aqui isso vira brilho radial nas cores do tema + logo (ou monograma) como
+     centro visual. O fundo mora no CSS porque sao gradientes derivados de
+     `--card-primary`/`--card-secondary`, que mudam por cartao. */
+  .verso {
+    @apply relative isolate h-full overflow-hidden rounded-lg p-6;
+  }
+
+  .verso::before {
+    content: "";
+    @apply absolute inset-0 -z-10;
+    background-image:
+      radial-gradient(
+        60% 55% at 12% 8%,
+        color-mix(in srgb, var(--card-primary) 32%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 55% at 88% 92%,
+        color-mix(in srgb, var(--card-secondary) 30%, transparent),
+        transparent 70%
+      );
+  }
+
+  /* Textura diagonal bem fraca: da' relevo ao fundo sem disputar com o texto. */
+  .verso::after {
+    content: "";
+    @apply absolute inset-0 -z-10 opacity-5;
+    background-image: repeating-linear-gradient(
+      45deg,
+      #fff 0 1px,
+      transparent 1px 12px
+    );
+  }
+
+  .verso-monograma {
+    @apply flex h-28 w-28 items-center justify-center rounded-full;
+    background-color: color-mix(in srgb, var(--card-primary) 16%, #020617);
+    /* Aneis concentricos por box-shadow, e nao por border: o segundo anel e'
+       um halo difuso e o terceiro e' sombra projetada — border nao faz nem um
+       nem outro, e empilhar tres elementos so' para isso seria pior. */
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--card-primary) 60%, transparent),
+      0 0 0 10px color-mix(in srgb, var(--card-primary) 8%, transparent),
+      0 18px 45px -15px color-mix(in srgb, var(--card-primary) 70%, transparent);
+  }
+
+  /* Filete que separa nome e cargo: duas linhas que somem nas pontas, com um
+     losango no meio. O losango e' um <span> porque os dois pseudo-elementos
+     ja' estao ocupados pelas linhas. */
+  .verso-filete {
+    @apply flex w-full max-w-xs items-center gap-3;
+  }
+
+  .verso-filete::before,
+  .verso-filete::after {
+    content: "";
+    @apply h-px flex-1;
+  }
+
+  .verso-filete::before {
+    background-image: linear-gradient(
+      to right,
+      transparent,
+      var(--card-primary)
+    );
+  }
+
+  .verso-filete::after {
+    background-image: linear-gradient(
+      to left,
+      transparent,
+      var(--card-secondary)
+    );
+  }
+
+  .verso-losango {
+    @apply h-1.5 w-1.5 rotate-45;
+    background-image: linear-gradient(
+      to bottom right,
+      var(--card-primary),
+      var(--card-secondary)
+    );
   }
 }

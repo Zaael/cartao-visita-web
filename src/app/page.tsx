@@ -25,7 +25,7 @@ export default async function Vitrine() {
       {cartoes.length === 0 ? (
         <p className="text-slate-400">Nenhum cartão publicado ainda.</p>
       ) : (
-        <ul className="grid w-full max-w-4xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-3">
           {cartoes.map((cartao) => (
             <li key={cartao.slug}>
               <Previa cartao={cartao} />

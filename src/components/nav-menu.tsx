@@ -35,7 +35,7 @@ export default function NavMenu({
                 onClick={() => onSelecionar(secao)}
                 aria-current={selecionada ? "true" : undefined}
                 title={texto}
-                className={`flex cursor-pointer flex-col items-center gap-1 border-b-2 px-2 pb-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--card-primary)] ${
+                className={`flex cursor-pointer flex-col items-center gap-1 border-b-2 px-1 pb-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--card-primary)] sm:px-2 ${
                   selecionada
                     ? "border-[var(--card-primary)] text-[var(--card-primary)]"
                     : "border-transparent text-slate-400 hover:text-white"

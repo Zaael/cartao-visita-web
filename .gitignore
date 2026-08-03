@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# claude code — config local da maquina (o launch.json e' compartilhado)
+.claude/settings.local.json
+
 # debug
 npm-debug.log*
 yarn-debug.log*

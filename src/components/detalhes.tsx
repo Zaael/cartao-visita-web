@@ -1,8 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
-import { Timeline, Text } from "@mantine/core";
-import { HiEnvelope, HiMiniPhone } from "react-icons/hi2";
+import {
+  HiChevronLeft,
+  HiChevronRight,
+  HiEnvelope,
+  HiMiniPhone,
+  HiPhoto,
+} from "react-icons/hi2";
 import { FaWhatsapp } from "react-icons/fa";
-import type { Cartao } from "@/types/cartao";
+import type { Cartao, Projeto } from "@/types/cartao";
+import ModalCartao from "./modal-cartao";
 import RedesSociais from "./redes-sociais";
 
 export function Sobre({ cartao }: { cartao: Cartao }) {
@@ -22,51 +31,184 @@ export function Sobre({ cartao }: { cartao: Cartao }) {
 }
 
 export function Projetos({ cartao }: { cartao: Cartao }) {
+  // `aberto` e `selecionado` são dois estados de propósito: ao fechar, o modal
+  // ainda anima a saída, e zerar o projeto junto esvaziaria o conteúdo antes
+  // de ele sumir da tela. Por isso o projeto só é descartado no fim da
+  // animação, via `aoSairDaTela`.
+  const [selecionado, setSelecionado] = useState<Projeto | null>(null);
+  const [aberto, setAberto] = useState(false);
+
   if (cartao.projetos.length === 0) return null;
 
   return (
-    <section className="w-full max-w-xl">
-      <Timeline active={cartao.projetos.length} lineWidth={3} bulletSize={16}>
+    <>
+      <section className="grid w-full max-w-xl gap-3 sm:grid-cols-2">
         {cartao.projetos.map((projeto) => (
-          <Timeline.Item key={projeto.titulo} title={projeto.titulo}>
-            <Text size="sm" c="dimmed">
+          <button
+            key={projeto.titulo}
+            type="button"
+            onClick={() => {
+              setSelecionado(projeto);
+              setAberto(true);
+            }}
+            className="card-mini"
+          >
+            <span className="font-sans text-sm font-bold text-white">
+              {projeto.titulo}
+            </span>
+            {/* Só a chamada: o texto inteiro está no modal. */}
+            <span className="line-clamp-2 text-xs leading-relaxed text-slate-400">
               {projeto.descricao}
-            </Text>
-            {projeto.link && (
-              <Text
-                component="a"
-                href={projeto.link}
+            </span>
+          </button>
+        ))}
+      </section>
+
+      <ModalCartao
+        aberto={aberto}
+        aoFechar={() => setAberto(false)}
+        aoSairDaTela={() => setSelecionado(null)}
+        tema={cartao.tema}
+        titulo={selecionado?.titulo ?? ""}
+      >
+        {selecionado && (
+          <div className="space-y-4">
+            {selecionado.imagemUrl && (
+              <Image
+                src={selecionado.imagemUrl}
+                alt=""
+                width={960}
+                height={420}
+                className="max-h-64 w-full rounded-lg object-cover"
+              />
+            )}
+
+            <p className="leading-relaxed text-slate-300">
+              {selecionado.descricao}
+            </p>
+
+            {selecionado.link && (
+              <a
+                href={selecionado.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                size="sm"
-                c="var(--card-primary)"
+                className="inline-block text-sm text-[var(--card-primary)] hover:underline"
               >
                 Ver projeto
-              </Text>
+              </a>
             )}
-          </Timeline.Item>
-        ))}
-      </Timeline>
-    </section>
+          </div>
+        )}
+      </ModalCartao>
+    </>
   );
 }
 
 export function Galeria({ cartao }: { cartao: Cartao }) {
-  if (cartao.galeria.length === 0) return null;
+  const fotos = cartao.galeria;
+  const [indice, setIndice] = useState(0);
+  const [aberto, setAberto] = useState(false);
+
+  // A aba existe mesmo sem foto (é assim que ela some da vista quando ninguém
+  // subiu nada), então o vazio precisa dizer o que está acontecendo.
+  if (fotos.length === 0) {
+    return (
+      <section className="flex flex-col items-center gap-3 text-center text-slate-400">
+        <HiPhoto size={44} className="opacity-40" aria-hidden />
+        <p className="text-sm">Nenhuma foto na galeria ainda.</p>
+      </section>
+    );
+  }
+
+  const irPara = (proximo: number) =>
+    setIndice((proximo + fotos.length) % fotos.length);
 
   return (
-    <section className="grid w-full max-w-xl grid-cols-2 gap-3 sm:grid-cols-3">
-      {cartao.galeria.map((url) => (
-        <Image
-          key={url}
-          src={url}
-          alt=""
-          width={200}
-          height={200}
-          className="h-32 w-full rounded-lg object-cover"
-        />
-      ))}
-    </section>
+    <>
+      <section className="grid w-full max-w-xl grid-cols-2 gap-3 sm:grid-cols-3">
+        {fotos.map((url, i) => (
+          // Índice na key porque nada impede a mesma URL de aparecer duas
+          // vezes na galeria, e aí duas keys iguais quebrariam a lista.
+          <button
+            key={`${i}-${url}`}
+            type="button"
+            onClick={() => {
+              setIndice(i);
+              setAberto(true);
+            }}
+            aria-label={`Abrir foto ${i + 1} de ${fotos.length}`}
+            className="card-mini p-1"
+          >
+            <Image
+              src={url}
+              alt=""
+              width={200}
+              height={200}
+              className="h-28 w-full rounded object-cover"
+            />
+          </button>
+        ))}
+      </section>
+
+      <ModalCartao
+        aberto={aberto}
+        aoFechar={() => setAberto(false)}
+        tema={cartao.tema}
+        titulo={`Foto ${indice + 1} de ${fotos.length}`}
+      >
+        <div className="flex h-full items-center gap-2">
+          {fotos.length > 1 && (
+            <SetaFoto
+              rotulo="Foto anterior"
+              Icone={HiChevronLeft}
+              onClick={() => irPara(indice - 1)}
+            />
+          )}
+
+          {/* `h-full` é o que segura a foto: sem altura definida aqui, este
+              div cresce com o conteúdo (é item de um flex-row centralizado) e
+              o `max-h-full` da imagem não tem contra o que resolver. */}
+          <div className="flex h-full min-w-0 flex-1 items-center justify-center">
+            <Image
+              src={fotos[indice]}
+              alt={`Foto ${indice + 1} da galeria de ${cartao.nome}`}
+              width={1200}
+              height={800}
+              className="h-auto max-h-full w-auto max-w-full rounded-lg object-contain"
+            />
+          </div>
+
+          {fotos.length > 1 && (
+            <SetaFoto
+              rotulo="Próxima foto"
+              Icone={HiChevronRight}
+              onClick={() => irPara(indice + 1)}
+            />
+          )}
+        </div>
+      </ModalCartao>
+    </>
+  );
+}
+
+function SetaFoto({
+  rotulo,
+  Icone,
+  onClick,
+}: {
+  rotulo: string;
+  Icone: React.ComponentType<{ size?: number; "aria-hidden"?: boolean }>;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={rotulo}
+      className="shrink-0 cursor-pointer rounded-full border border-slate-600 p-2 text-slate-300 transition-colors hover:border-slate-400 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--card-primary)]"
+    >
+      <Icone size={20} aria-hidden />
+    </button>
   );
 }
 
